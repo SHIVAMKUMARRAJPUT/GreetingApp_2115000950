@@ -1,0 +1,48 @@
+## ASP.NET Core
+bin/
+obj/
+**/*.db
+**/*.db-journal
+**/*.pdb
+**/*.log
+**/secrets/
+**/appsettings*.json
+
+
+## Visual Studio
+.vs/
+.vscode/
+*.suo
+*.user
+*.userosscache
+*.sln.cache
+*.ncb
+*.VC.db
+*.code-workspace
+
+## Build files
+publish/
+out/
+
+## Dependencies
+node_modules/
+bower_components/
+wwwroot/lib/
+
+## Logs & Debugging
+*.log
+logs/
+*.nlog
+
+## Environment Variables
+.env
+.env.local
+.env.*.local
+
+## Rider / JetBrains
+.idea/
+*.sln.iml
+
+## Docker
+.dockerignore
+docker-compose.override.yml
