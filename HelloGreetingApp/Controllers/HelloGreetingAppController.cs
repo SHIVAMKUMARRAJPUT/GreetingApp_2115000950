@@ -1,16 +1,101 @@
 using Microsoft.AspNetCore.Mvc;
 using ModelLayer.Model;
 using NLog;
+<<<<<<< HEAD
+using System.Collections.Generic;
+using System.Linq;
+using BusinessLayer.Interface;
+=======
+using BusinessLayer.Interface;
 using RepositoryLayer.Services;
+>>>>>>> UC2
 
 [ApiController]
 [Route("[controller]")]
 public class HelloGreetingAppController : ControllerBase
 {
-    private GreetingBL _greeting;
+    private IGreetingBL _greeting;
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-    public HelloGreetingAppController(GreetingBL greeting){
+    public HelloGreetingAppController(IGreetingBL greeting){
         _greeting = greeting;
+    }
+
+    [HttpGet("greet")]
+    public IActionResult GetHello()
+    {
+<<<<<<< HEAD
+        IGreetingBL _greetingBl;
+        private readonly ILogger<HelloGreetingAppController> _logger;
+        public HelloGreetingAppController(IGreetingBL greetingBl, ILogger<HelloGreetingAppController> logger)
+        {
+            _logger = logger;
+            _greetingBl = greetingBl;
+        }
+
+        private static readonly Logger logger = LogManager.GetCurrentClassLogger();
+        static int count = 1;
+        public static List<RequestModel> ls = new List<RequestModel>();
+
+        /// <summary>
+        /// Helper function to initialize data
+        /// </summary>
+        public void helper()
+=======
+        try
+>>>>>>> UC2
+        {
+            logger.Info("GREET request received.");
+            return Ok(new { Success = true, Message = "Hello, welcome to our API!",data=_greeting.SayHello() });
+        }
+<<<<<<< HEAD
+
+        [HttpGet("greet")]
+        public IActionResult GetGreeting([FromQuery] string? firstName, [FromQuery] string? lastName)
+        {
+            _logger.LogInformation("Received GET request in Controller. First Name: {FirstName}, Last Name: {LastName}", firstName, lastName);
+
+            string greetingMessage = _greetingBl.GetGreeting(firstName, lastName);
+
+            _logger.LogInformation("Final Greeting Response: {GreetingMessage}", greetingMessage);
+            return Ok(new { Message = greetingMessage });
+        }
+
+
+
+        [HttpGet("hello")]
+        public IActionResult GetHello()
+        {
+            try
+            {
+                logger.Info("GET request received.");
+                var response = new {
+                    Success = true,
+                    Message = "Hello World !",
+                    Data = _greetingBl.SayHello()
+                };
+                logger.Info("GET request successful.");
+                return Ok(response);
+            }
+            catch (System.Exception ex)
+            {
+                logger.Error(ex, "Error occurred in GET request.");
+                return StatusCode(500, new { Success = false, Message = "Internal Server Error" });
+            }
+        }
+
+
+        /// <summary>
+        /// Get method to get the Greeting Message
+        /// </summary>
+        [HttpGet]
+        public IActionResult Get()
+=======
+        catch (Exception ex)
+>>>>>>> UC2
+        {
+            logger.Error(ex, "Error occurred in GREET request.");
+            return StatusCode(500, new { Success = false, Message = "Internal Server Error" });
+        }
     }
 
     [HttpGet]

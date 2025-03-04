@@ -1,24 +1,34 @@
-﻿using Microsoft.AspNetCore.Builder;
+﻿using BusinessLayer.Interface;
+using Microsoft.AspNetCore.Builder;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
+<<<<<<< HEAD
 using BusinessLayer.Interface;
-using RepositoryLayer.Services;
-using RepositoryLayer.Interface;
+using BusinessLayer.Services;
+=======
+using Microsoft.OpenApi.Models;
+>>>>>>> UC2
 using NLog;
 using NLog.Web;
 using System;
-   
+
 
     var builder = WebApplication.CreateBuilder(args);
+<<<<<<< HEAD
+
+    builder.Services.AddScoped<IGreetingBL,GreetingBL>();
+
+    // ✅ Add NLog as the logging provider
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
+
+=======
+>>>>>>> UC2
     builder.Services.AddControllers();
-    builder.Services.AddSingleton<IGreetingBL,GreetingBL>();
-    builder.Services.AddSingleton<IGreetingRL,GreetingRL>();
-// ✅ Add NLog as the logging provider
+    builder.Services.AddSingleton<IGreetingBL, GreetingBL>();
+    // ✅ Add NLog as the logging provider
     builder.Services.AddEndpointsApiExplorer();
     builder.Services.AddSwaggerGen();
-
-   
 
     var app = builder.Build();
 
