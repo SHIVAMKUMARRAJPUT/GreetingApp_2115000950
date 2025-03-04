@@ -1,51 +1,5 @@
 # Visual Studio specific
 .vs/
-<<<<<<< HEAD
-*.suo
-*.user
-*.userosscache
-*.sln.docstates
-
-# Build output
-bin/
-obj/
-out/
-Debug/
-Release/
-x64/
-x86/
-
-# ASP.NET Core specific
-appsettings*.json  # Keep appsettings.json if needed, but ignore environment-specific ones like appsettings.Development.json
-secrets.json
-logs/
-wwwroot/lib/
-wwwroot/node_modules/
-
-# Dependencies
-packages/
-node_modules/
-.env
-
-# Entity Framework Migrations
-Migrations/
-
-# NuGet
-*.nupkg
-.nuget/
-project.lock.json
-package-lock.json
-
-# Resharper & Rider
-.idea/
-*.DotSettings.user
-
-# Other
-*.bak
-*.swp
-Thumbs.db
-.DS_Store
-=======
 *.user
 *.suo
 *.cache
@@ -111,4 +65,3 @@ Migrations/
 *.log
 *.tlog
 *.bak
->>>>>>> UC2

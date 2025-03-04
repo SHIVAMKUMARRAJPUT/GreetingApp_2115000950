@@ -1,51 +1,3 @@
-<<<<<<< HEAD
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using BusinessLayer.Interface;
-using NLog;
-
-namespace BusinessLayer.Services
-{
-    public class GreetingBL : IGreetingBL
-    {
-        private static readonly NLog.Logger _logger = LogManager.GetCurrentClassLogger();
-
-        public string GetGreeting(string? firstName, string? lastName)
-        {
-            _logger.Info("Received request in Business Layer. First Name: {0}, Last Name: {1}", firstName, lastName);
-
-            string greetingMessage;
-
-            if (!string.IsNullOrEmpty(firstName) && !string.IsNullOrEmpty(lastName))
-            {
-                greetingMessage = $"Hello {firstName} {lastName}!";
-            }
-            else if (!string.IsNullOrEmpty(firstName))
-            {
-                greetingMessage = $"Hello {firstName}!";
-            }
-            else if (!string.IsNullOrEmpty(lastName))
-            {
-                greetingMessage = $"Hello {lastName}!";
-            }
-            else
-            {
-                greetingMessage = "Hello, World!";
-            }
-
-            _logger.Info("Generated Greeting Message in Business Layer: {0}", greetingMessage);
-            return greetingMessage;
-        }
-
-        public string SayHello()
-        {
-            string message = "Hello World";
-            _logger.Info("SayHello method called. Message: {0}", message);
-            return message;
-=======
 ﻿using BusinessLayer.Interface;
 using ModelLayer.Model;
 
@@ -55,6 +7,8 @@ public class GreetingBL : IGreetingBL{
     public GreetingBL(){
         helper();
     }
+
+    //UC2
     public string SayHello()
     {
         return "Hello World !";
@@ -100,8 +54,33 @@ public class GreetingBL : IGreetingBL{
         var item = ls.FirstOrDefault(x => x.id == id);
         if (item != null){
             ls.Remove(item);
->>>>>>> UC2
         }
+
+    }
+
+    //UC3
+    public string GetGreeting(RequestModel model){
+       
+        string greetingMessage;
+
+        if (!string.IsNullOrEmpty(model.name) && !string.IsNullOrEmpty(model.lname))
+        {
+            greetingMessage = $"Hello {model.name} {model.lname}!";
+        }
+        else if (!string.IsNullOrEmpty(model.name))
+        {
+            greetingMessage = $"Hello {model.name}!";
+        }
+        else if (!string.IsNullOrEmpty(model.lname))
+        {
+            greetingMessage = $"Hello {model.lname}!";
+        }
+        else
+        {
+            greetingMessage = "Hello, World!";
+        }
+
+         return greetingMessage;
     }
 }
 

@@ -10,15 +10,12 @@ namespace BusinessLayer.Interface
     public interface IGreetingBL
     {
         public string SayHello();
-<<<<<<< HEAD
-        string GetGreeting(string? firstName, string? lastName);
-=======
         public void helper();
         public List<RequestModel> GetAll();
         public void Add(RequestModel model);
         public RequestModel GetById(int id);
         public void Update(RequestModel model);
         public void Delete(int id);
->>>>>>> UC2
+        public string GetGreeting(RequestModel model);
     }
 }
