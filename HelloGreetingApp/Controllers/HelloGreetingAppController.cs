@@ -200,4 +200,33 @@ public class HelloGreetingAppController : ControllerBase
         }
     }
 
+
+    //UC6
+
+    [HttpGet("GetAllGreetings")]
+    public IActionResult GetAllGreetings()
+    {
+        ResponseModel<List<GreetingModel>> response = new ResponseModel<List<GreetingModel>>();
+        try
+        {
+            var result = _greetingBL.GetAllGreetingsBL();
+            if (result != null && result.Count > 0)
+            {
+                response.Success = true;
+                response.Message = "Greeting Messages Found";
+                response.Data = result;
+                return Ok(response);
+            }
+            response.Success = false;
+            response.Message = "No Greeting Messages Found";
+            return NotFound(response);
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"An error occurred: {ex.Message}";
+            return StatusCode(500, response);
+        }
+    }
+
 }

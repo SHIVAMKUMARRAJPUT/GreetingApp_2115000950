@@ -111,6 +111,22 @@ public class GreetingBL : IGreetingBL{
         return _greetingRL.GetGreetingByIdRL(Id);
     }
 
+    //UC6
+
+    public List<GreetingModel> GetAllGreetingsBL()
+    {
+        var entityList = _greetingRL.GetAllGreetingsRL();  // Calling Repository Layer
+        if (entityList != null)
+        {
+            return entityList.Select(g => new GreetingModel
+            {
+                Id = g.Id,
+                Message = g.Message
+            }).ToList();  // Converting List of Entity to List of Model
+        }
+        return null;
+    }
+
 }
 
 

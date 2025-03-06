@@ -57,5 +57,12 @@ namespace RepositoryLayer.Services
             }
             return null;
         }
+
+        //UC6
+        public List<GreetEntity> GetAllGreetingsRL()
+        {
+            return _dbContext.Greet.ToList();  // Fetching All Data from Database
+        }
+
     }
 }
