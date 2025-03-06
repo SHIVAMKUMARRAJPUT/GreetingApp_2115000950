@@ -1,7 +1,20 @@
 ﻿using BusinessLayer.Interface;
 using ModelLayer.Model;
+using RepositoryLayer.Entity;
+using RepositoryLayer.Services;
+using RepositoryLayer.Interface;
 
 public class GreetingBL : IGreetingBL{
+
+    private readonly IGreetingRL _greetingRL;
+
+    public GreetingBL(IGreetingRL greetingRL)
+    {
+        _greetingRL = greetingRL;
+    }
+
+
+
     private int count = 1;
     private List<RequestModel> ls = new List<RequestModel>();
     public GreetingBL(){
@@ -82,6 +95,15 @@ public class GreetingBL : IGreetingBL{
 
          return greetingMessage;
     }
+
+    //UC4
+
+    public GreetEntity SaveGreetingBL(GreetingModel greetingModel)
+    {
+        var result = _greetingRL.SaveGreetingRL(greetingModel);
+        return result;
+    }
+
 }
 
 

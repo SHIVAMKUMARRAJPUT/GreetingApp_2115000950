@@ -3,23 +3,24 @@ using ModelLayer.Model;
 using NLog;
 using RepositoryLayer.Services;
 using BusinessLayer.Interface;
+using RepositoryLayer.Interface;
 
 
 [ApiController]
 [Route("[controller]")]
 public class HelloGreetingAppController : ControllerBase
 {
-    private IGreetingBL _greeting;
+    private IGreetingBL _greetingBL;
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
     public HelloGreetingAppController(IGreetingBL greeting){
-        _greeting = greeting;
+        _greetingBL = greeting;
     }
     //UC3
     [HttpPost("Hello")]
     public IActionResult GetGreeting([FromBody] RequestModel model)
     {
        
-        string greetingMessage = _greeting.GetGreeting(model);
+        string greetingMessage = _greetingBL.GetGreeting(model);
         return Ok(new { Message = greetingMessage });
     }
 
@@ -31,7 +32,7 @@ public class HelloGreetingAppController : ControllerBase
         try
         {
             logger.Info("GREET request received.");
-            return Ok(new { Success = true, Message = "Hello, welcome to our API!",data=_greeting.SayHello() });
+            return Ok(new { Success = true, Message = "Hello, welcome to our API!",data=_greetingBL.SayHello() });
         }
         catch (Exception ex)
         {
@@ -44,7 +45,7 @@ public class HelloGreetingAppController : ControllerBase
     public IActionResult Get(){
         try {
             logger.Info("GET request received.");
-            var data = _greeting.GetAll();
+            var data = _greetingBL.GetAll();
             return Ok(new { Success = true, Message = "Data fetched successfully", Data = data });
         }
         catch (Exception ex)
@@ -60,7 +61,7 @@ public class HelloGreetingAppController : ControllerBase
         try
         {
             logger.Info("POST request received.");
-            _greeting.Add(model);
+            _greetingBL.Add(model);
             return Ok(new { Success = true, Message = "Request received successfully", Data = model });
         }
         catch (Exception ex)
@@ -77,7 +78,7 @@ public class HelloGreetingAppController : ControllerBase
         {
             logger.Info($"PUT request received for ID: {id}");
 
-            var existingEntry = _greeting.GetById(id);
+            var existingEntry = _greetingBL.GetById(id);
             if (existingEntry == null)
             {
                 logger.Warn($"PUT request failed - Record with ID {id} not found.");
@@ -85,7 +86,7 @@ public class HelloGreetingAppController : ControllerBase
             }
 
             updatedModel.id = id;
-            _greeting.Update(updatedModel);
+            _greetingBL.Update(updatedModel);
             return Ok(new { Success = true, Message = "Record updated successfully", Data = updatedModel });
         }
         catch (Exception ex)
@@ -102,7 +103,7 @@ public class HelloGreetingAppController : ControllerBase
         {
             logger.Info($"PATCH request received for ID: {id}");
 
-            var existingEntry = _greeting.GetById(id);
+            var existingEntry = _greetingBL.GetById(id);
             if (existingEntry == null)
             {
                 logger.Warn($"PATCH request failed - Record with ID {id} not found.");
@@ -115,7 +116,7 @@ public class HelloGreetingAppController : ControllerBase
             if (!string.IsNullOrEmpty(updatedModel.lname))
                 existingEntry.lname = updatedModel.lname;
 
-            _greeting.Update(existingEntry);
+            _greetingBL.Update(existingEntry);
 
             return Ok(new { Success = true, Message = "Record patched successfully", Data = existingEntry });
         }
@@ -133,14 +134,14 @@ public class HelloGreetingAppController : ControllerBase
         {
             logger.Info($"DELETE request received for ID: {id}");
 
-            var existingEntry = _greeting.GetById(id);
+            var existingEntry = _greetingBL.GetById(id);
             if (existingEntry == null)
             {
                 logger.Warn($"DELETE request failed - Record with ID {id} not found.");
                 return NotFound(new { Success = false, Message = "Record not found" });
             }
 
-            _greeting.Delete(id);
+            _greetingBL.Delete(id);
             return Ok(new { Success = true, Message = "Record deleted successfully" });
         }
         catch (Exception ex)
@@ -148,5 +149,25 @@ public class HelloGreetingAppController : ControllerBase
             logger.Error(ex, $"Error occurred in DELETE request for ID {id}");
             return StatusCode(500, new { Success = false, Message = "Internal Server Error" });
         }
+    }
+
+    //UC4
+
+    [HttpPost]
+    [Route("save")]
+
+    public IActionResult SaveGreeting([FromBody] GreetingModel greetingModel)
+    {
+        var result = _greetingBL.SaveGreetingBL(greetingModel);
+
+        var response = new ResponseModel<object>
+        {
+            Success = true,
+            Message = "Greeting Created",
+            Data = result
+
+        };
+        return Created("Greeting Created", response);
+
     }
 }
