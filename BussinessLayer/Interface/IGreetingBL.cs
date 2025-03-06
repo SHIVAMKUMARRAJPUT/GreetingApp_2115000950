@@ -25,7 +25,8 @@ namespace BusinessLayer.Interface
         //UC5
         public GreetingModel GetGreetingByIdBL(int Id);
         //UC6
-
         public List<GreetingModel> GetAllGreetingsBL();
+        //UC7
+        public GreetingModel EditGreetingBL(int id, GreetingModel greetingModel);
     }
 }
