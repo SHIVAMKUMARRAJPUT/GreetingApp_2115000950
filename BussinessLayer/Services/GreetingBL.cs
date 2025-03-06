@@ -104,6 +104,13 @@ public class GreetingBL : IGreetingBL{
         return result;
     }
 
+
+    //UC5
+    public GreetingModel GetGreetingByIdBL(int Id)
+    {
+        return _greetingRL.GetGreetingByIdRL(Id);
+    }
+
 }
 
 

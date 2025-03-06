@@ -19,6 +19,8 @@ namespace RepositoryLayer.Services
             _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
 
         }
+
+        //UC4
         public GreetEntity SaveGreetingRL(GreetingModel greetingModel)
         {
             var existingMessage = _dbContext.Greet.FirstOrDefault<GreetEntity>(e => e.Id == greetingModel.Id);
@@ -37,6 +39,23 @@ namespace RepositoryLayer.Services
 
 
             return existingMessage;
+        }
+
+
+        //UC5
+        public GreetingModel GetGreetingByIdRL(int Id)
+        {
+            var entity = _dbContext.Greet.FirstOrDefault(g => g.Id == Id);
+
+            if (entity != null)
+            {
+                return new GreetingModel()
+                {
+                    Id = entity.Id,
+                    Message = entity.Message
+                };
+            }
+            return null;
         }
     }
 }

@@ -21,5 +21,8 @@ namespace BusinessLayer.Interface
 
         //UC4
         public GreetEntity SaveGreetingBL(GreetingModel greetingModel);
+
+        //UC5
+        public GreetingModel GetGreetingByIdBL(int Id);
     }
 }
