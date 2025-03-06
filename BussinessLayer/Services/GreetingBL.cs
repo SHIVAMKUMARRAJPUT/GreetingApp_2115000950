@@ -142,6 +142,18 @@ public class GreetingBL : IGreetingBL{
         return null;
     }
 
+    //UC8
+    public bool DeleteGreetingBL(int id)
+    {
+        var result = _greetingRL.DeleteGreetingRL(id);
+        if (result)
+        {
+            return true; // Successfully Deleted
+        }
+        return false; // Not Found
+    }
+
+
 }
 
 

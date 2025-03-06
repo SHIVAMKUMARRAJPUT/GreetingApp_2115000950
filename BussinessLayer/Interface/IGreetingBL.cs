@@ -28,5 +28,8 @@ namespace BusinessLayer.Interface
         public List<GreetingModel> GetAllGreetingsBL();
         //UC7
         public GreetingModel EditGreetingBL(int id, GreetingModel greetingModel);
+
+        //UC8
+        public bool DeleteGreetingBL(int id);
     }
 }

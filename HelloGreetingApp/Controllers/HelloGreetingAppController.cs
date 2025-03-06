@@ -6,6 +6,9 @@ using BusinessLayer.Interface;
 using RepositoryLayer.Interface;
 
 
+/// <summary>
+/// Class Providing API for HelloGreetingApp
+/// </summary>
 [ApiController]
 [Route("[controller]")]
 public class HelloGreetingAppController : ControllerBase
@@ -16,6 +19,11 @@ public class HelloGreetingAppController : ControllerBase
         _greetingBL = greeting;
     }
     //UC3
+
+    // <summary>
+    // To Print Greeting Message
+    // </summary>
+    // <returns> "Hello World" </returns>
     [HttpPost("Hello")]
     public IActionResult GetGreeting([FromBody] RequestModel model)
     {
@@ -258,4 +266,31 @@ public class HelloGreetingAppController : ControllerBase
         }
     }
 
+
+    //UC8
+
+    [HttpDelete("DeleteGreeting/{id}")]
+    public IActionResult DeleteGreeting(int id)
+    {
+        ResponseModel<string> response = new ResponseModel<string>();
+        try
+        {
+            bool result = _greetingBL.DeleteGreetingBL(id);
+            if (result)
+            {
+                response.Success = true;
+                response.Message = "Greeting Message Deleted Successfully";
+                return Ok(response);
+            }
+            response.Success = false;
+            response.Message = "Greeting Message Not Found";
+            return NotFound(response);
+        }
+        catch (Exception ex)
+        {
+            response.Success = false;
+            response.Message = $"An error occurred: {ex.Message}";
+            return StatusCode(500, response);
+        }
+    }
 }

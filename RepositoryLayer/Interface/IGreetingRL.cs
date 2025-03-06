@@ -20,5 +20,8 @@ namespace RepositoryLayer.Interface
 
         //UC7
         public GreetEntity EditGreetingRL(int id, GreetingModel greetingModel);
+
+        //UC8
+        public bool DeleteGreetingRL(int id);
     }
 }
