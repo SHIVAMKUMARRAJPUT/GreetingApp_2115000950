@@ -4,6 +4,7 @@ using NLog;
 using RepositoryLayer.Services;
 using BusinessLayer.Interface;
 using RepositoryLayer.Interface;
+using Middleware.GlobalExceptionHandler;
 
 
 /// <summary>
@@ -202,9 +203,9 @@ public class HelloGreetingAppController : ControllerBase
         }
         catch (Exception ex)
         {
-            response.Success = false;
-            response.Message = $"An error occurred: {ex.Message}";
-            return StatusCode(500, response);
+            var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
+            return StatusCode(500, errorResponse);
+
         }
     }
 
@@ -231,9 +232,9 @@ public class HelloGreetingAppController : ControllerBase
         }
         catch (Exception ex)
         {
-            response.Success = false;
-            response.Message = $"An error occurred: {ex.Message}";
-            return StatusCode(500, response);
+            var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
+            return StatusCode(500, errorResponse);
+
         }
     }
 
@@ -260,9 +261,9 @@ public class HelloGreetingAppController : ControllerBase
         }
         catch (Exception ex)
         {
-            response.Success = false;
-            response.Message = $"An error occurred: {ex.Message}";
-            return StatusCode(500, response);
+            var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
+            return StatusCode(500, errorResponse);
+
         }
     }
 
@@ -288,9 +289,9 @@ public class HelloGreetingAppController : ControllerBase
         }
         catch (Exception ex)
         {
-            response.Success = false;
-            response.Message = $"An error occurred: {ex.Message}";
-            return StatusCode(500, response);
+            var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
+            return StatusCode(500, errorResponse);
+
         }
     }
 }
