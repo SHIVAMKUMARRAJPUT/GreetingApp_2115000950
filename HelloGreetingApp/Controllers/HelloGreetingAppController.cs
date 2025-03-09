@@ -11,7 +11,7 @@ using Middleware.GlobalExceptionHandler;
 /// Class Providing API for HelloGreetingApp
 /// </summary>
 [ApiController]
-[Route("[controller]")]
+[Route("api/[controller]")]
 public class HelloGreetingAppController : ControllerBase
 {
     private IGreetingBL _greetingBL;
@@ -54,7 +54,7 @@ public class HelloGreetingAppController : ControllerBase
     public IActionResult Get(){
         try {
             logger.Info("GET request received.");
-            var data = _greetingBL.GetAll();
+            List<RequestModel> data = _greetingBL.GetAll();
             return Ok(new { Success = true, Message = "Data fetched successfully", Data = data });
         }
         catch (Exception ex)

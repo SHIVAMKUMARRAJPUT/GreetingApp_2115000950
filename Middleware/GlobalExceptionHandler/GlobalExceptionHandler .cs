@@ -14,6 +14,7 @@ namespace Middleware.GlobalExceptionHandler
 {
     public class GlobalExceptionHandler : ExceptionFilterAttribute
     {
+        //UC9
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public override void OnException(ExceptionContext context)

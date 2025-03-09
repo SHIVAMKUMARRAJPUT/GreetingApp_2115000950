@@ -10,11 +10,14 @@ using Microsoft.EntityFrameworkCore;
 using RepositoryLayer.Contexts;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Services;
+using BusinessLayer.Interface;
+using BusinessLayer.Services;
+using RepositoryLayer.Services;
 
 
 
 
-var builder = WebApplication.CreateBuilder(args);
+    var builder = WebApplication.CreateBuilder(args);
 
 
     // Retrieve connection string
@@ -29,12 +32,14 @@ var builder = WebApplication.CreateBuilder(args);
 
 
     builder.Services.AddControllers();
+    // Register DbContext
+    builder.Services.AddDbContext<GreetingAppContext>(options =>
+    options.UseSqlServer(connectionString));
     builder.Services.AddScoped<IGreetingRL, GreetingRL>();
     builder.Services.AddScoped<IGreetingBL,GreetingBL>();
-    
-// Register DbContext
-builder.Services.AddDbContext<GreetingAppContext>(options =>
-    options.UseSqlServer(connectionString));
+    builder.Services.AddScoped<IUserBL, UserBL>();
+    builder.Services.AddScoped<IUserRL, UserRL>();
+
 
     // ✅ Add NLog as the logging provider
     builder.Services.AddEndpointsApiExplorer();

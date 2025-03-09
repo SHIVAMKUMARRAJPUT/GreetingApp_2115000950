@@ -10,6 +10,7 @@ namespace Middleware.GlobalExceptionHandler
 {
     public class ExceptionHandler
     {
+        //UC9
         private static readonly Logger _logger = LogManager.GetCurrentClassLogger();
 
         public static string HandleException(Exception ex, out object errorResponse)

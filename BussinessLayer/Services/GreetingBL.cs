@@ -4,22 +4,22 @@ using RepositoryLayer.Entity;
 using RepositoryLayer.Services;
 using RepositoryLayer.Interface;
 
+namespace BusinessLayer.Services;
 public class GreetingBL : IGreetingBL{
 
     private readonly IGreetingRL _greetingRL;
 
     public GreetingBL(IGreetingRL greetingRL)
     {
+        helper();
         _greetingRL = greetingRL;
     }
 
 
 
-    private int count = 1;
-    private List<RequestModel> ls = new List<RequestModel>();
-    public GreetingBL(){
-        helper();
-    }
+    private int count = ls.Count+1;
+    private static List<RequestModel> ls = new List<RequestModel>();
+
 
     //UC2
     public string SayHello()
@@ -41,6 +41,7 @@ public class GreetingBL : IGreetingBL{
 
     public List<RequestModel> GetAll()
     {
+        
         return ls;
     }
 
