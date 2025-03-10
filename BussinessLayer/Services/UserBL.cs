@@ -1,67 +1,72 @@
 ﻿using System;
 using ModelLayer.DTO;
 using Microsoft.Extensions.Logging; // ✅ Use Microsoft ILogger
-using RepositoryLayer.Entity;
+using ModelLayer.Entity;
 using RepositoryLayer.Interface;
 using BusinessLayer.Interface;
+using Middleware.JwtHelper; // ✅ Added JWT Helper
+
 namespace BusinessLayer.Services;
 public class UserBL : IUserBL
+{
+    private readonly ILogger<UserBL> _logger; // ✅ Correct logging
+    private readonly IUserRL _userRL;
+    private readonly JwtTokenHelper _jwtTokenHelper; // ✅ JWT Helper added
+
+    public UserBL(IUserRL userRL, ILogger<UserBL> logger, JwtTokenHelper jwtTokenHelper)
     {
-        private readonly ILogger<UserBL> _logger; // ✅ Correct logging
-        private readonly IUserRL _userRL;
+        _logger = logger;
+        _userRL = userRL;
+        _jwtTokenHelper = jwtTokenHelper; // ✅ Assign JWT Helper
+    }
 
-        public UserBL(IUserRL userRL, ILogger<UserBL> logger)
+    public UserEntity RegistrationBL(RegisterDTO registerDTO)
+    {
+        try
         {
-            _logger = logger;
-            _userRL = userRL;
+            _logger.LogInformation("Attempting to register user: {Email}", registerDTO.Email);
+
+            var result = _userRL.Registration(registerDTO);
+            if (result != null)
+            {
+                _logger.LogInformation("User registration successful for: {Email}", registerDTO.Email);
+            }
+            else
+            {
+                _logger.LogWarning("User registration failed for: {Email}", registerDTO.Email);
+            }
+            return result;
         }
-
-        public UserEntity RegistrationBL(RegisterDTO registerDTO)
+        catch (Exception ex)
         {
-            try
-            {
-                _logger.LogInformation("Attempting to register user: {Email}", registerDTO.Email);
-
-                var result = _userRL.Registration(registerDTO);
-                if (result != null)
-                {
-                    _logger.LogInformation("User registration successful for: {Email}", registerDTO.Email);
-                }
-                else
-                {
-                    _logger.LogWarning("User registration failed for: {Email}", registerDTO.Email);
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during user registration for {Email}", registerDTO.Email);
-                throw;
-            }
-        }
-
-        public UserEntity LoginnUserBL(LoginDTO loginDTO)
-        {
-            try
-            {
-                _logger.LogInformation("Attempting to log in user: {Email}", loginDTO.Email);
-
-                var result = _userRL.LoginnUserRL(loginDTO);
-                if (result != null)
-                {
-                    _logger.LogInformation("Login successful for user: {Email}", loginDTO.Email);
-                }
-                else
-                {
-                    _logger.LogWarning("Login failed for user: {Email}", loginDTO.Email);
-                }
-                return result;
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error during login for {Email}", loginDTO.Email);
-                throw;
-            }
+            _logger.LogError(ex, "Error during user registration for {Email}", registerDTO.Email);
+            throw;
         }
     }
 
+    public (UserEntity user, string token) LoginnUserBL(LoginDTO loginDTO)
+    {
+        try
+        {
+            _logger.LogInformation("Attempting to log in user: {Email}", loginDTO.Email);
+
+            var user = _userRL.LoginnUserRL(loginDTO);
+            if (user != null)
+            {
+                _logger.LogInformation("Login successful for user: {Email}", loginDTO.Email);
+
+                // ✅ Generate JWT token
+                var token = _jwtTokenHelper.GenerateToken(user);
+                return (user, token);
+            }
+
+            _logger.LogWarning("Login failed for user: {Email}", loginDTO.Email);
+            return (null, null);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error during login for {Email}", loginDTO.Email);
+            throw;
+        }
+    }
+}

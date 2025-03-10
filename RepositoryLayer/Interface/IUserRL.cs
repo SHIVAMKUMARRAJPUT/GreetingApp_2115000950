@@ -4,7 +4,8 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using ModelLayer.DTO;
-using RepositoryLayer.Entity;
+//using RepositoryLayer.Entity;
+using ModelLayer.Entity;
 
 namespace RepositoryLayer.Interface
 {

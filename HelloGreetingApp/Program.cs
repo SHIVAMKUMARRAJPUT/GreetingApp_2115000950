@@ -10,52 +10,80 @@ using Microsoft.EntityFrameworkCore;
 using RepositoryLayer.Contexts;
 using RepositoryLayer.Interface;
 using RepositoryLayer.Services;
-using BusinessLayer.Interface;
 using BusinessLayer.Services;
-using RepositoryLayer.Services;
+using Middleware.JwtHelper;
 
+var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+logger.Info("Starting application...");
 
-
-
+try
+{
     var builder = WebApplication.CreateBuilder(args);
 
+    // ✅ Setup NLog for logging
+    builder.Logging.ClearProviders();
+    builder.Host.UseNLog();
 
-    // Retrieve connection string
+    // ✅ Retrieve connection string
     var connectionString = builder.Configuration.GetConnectionString("GreetingAppDB");
-
-    Console.WriteLine($"Connection String: {connectionString}"); // Debugging output
 
     if (string.IsNullOrEmpty(connectionString))
     {
-        throw new InvalidOperationException("Connection string 'GreetingAppDB' not found in appsettings.json.");
+        logger.Error("Connection string 'GreetingAppDB' not found in appsettings.json.");
+        throw new InvalidOperationException("Connection string 'GreetingAppDB' not found.");
     }
 
+    logger.Info("Database connection string loaded successfully.");
 
+    // ✅ Register services
     builder.Services.AddControllers();
-    // Register DbContext
+
+    // ✅ Register DbContext
     builder.Services.AddDbContext<GreetingAppContext>(options =>
-    options.UseSqlServer(connectionString));
+        options.UseSqlServer(connectionString));
+
+    // ✅ Register Business & Repository Layer
     builder.Services.AddScoped<IGreetingRL, GreetingRL>();
-    builder.Services.AddScoped<IGreetingBL,GreetingBL>();
+    builder.Services.AddScoped<IGreetingBL, GreetingBL>();
     builder.Services.AddScoped<IUserBL, UserBL>();
     builder.Services.AddScoped<IUserRL, UserRL>();
 
+    // ✅ Register JWT Token Helper as a Singleton
+    builder.Services.AddSingleton<JwtTokenHelper>();
 
-    // ✅ Add NLog as the logging provider
+    // ✅ Configure Swagger
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen();
+    builder.Services.AddSwaggerGen(c =>
+    {
+        c.SwaggerDoc("v1", new OpenApiInfo { Title = "User Registration API", Version = "v1" });
+    });
 
     var app = builder.Build();
 
+    // ✅ Enable Swagger UI in Development
     if (app.Environment.IsDevelopment())
     {
         app.UseSwagger();
-        app.UseSwaggerUI();
+        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "User Registration API v1"));
     }
-   
 
+    // ✅ Middleware Configuration
     app.UseHttpsRedirection();
+
+    // ✅ Ensure proper Authentication & Authorization order
+    app.UseAuthentication();
     app.UseAuthorization();
+
     app.MapControllers();
 
+    logger.Info("Application started successfully.");
     app.Run();
+}
+catch (Exception ex)
+{
+    logger.Fatal(ex, "Application startup failed.");
+}
+finally
+{
+    LogManager.Shutdown();
+}
