@@ -42,6 +42,8 @@ try
     builder.Services.AddDbContext<GreetingAppContext>(options =>
         options.UseSqlServer(connectionString));
 
+    builder.Services.AddScoped<Middleware.Email.SMTP>();
+
     // ✅ Register Business & Repository Layer
     builder.Services.AddScoped<IGreetingRL, GreetingRL>();
     builder.Services.AddScoped<IGreetingBL, GreetingBL>();
@@ -53,19 +55,15 @@ try
 
     // ✅ Configure Swagger
     builder.Services.AddEndpointsApiExplorer();
-    builder.Services.AddSwaggerGen(c =>
-    {
-        c.SwaggerDoc("v1", new OpenApiInfo { Title = "User Registration API", Version = "v1" });
-    });
+    builder.Services.AddSwaggerGen();
 
     var app = builder.Build();
 
     // ✅ Enable Swagger UI in Development
-    if (app.Environment.IsDevelopment())
-    {
+  
         app.UseSwagger();
-        app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "User Registration API v1"));
-    }
+        app.UseSwaggerUI();
+    
 
     // ✅ Middleware Configuration
     app.UseHttpsRedirection();

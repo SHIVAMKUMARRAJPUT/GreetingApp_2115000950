@@ -56,7 +56,7 @@ public class UserBL : IUserBL
                 _logger.LogInformation("Login successful for user: {Email}", loginDTO.Email);
 
                 // ✅ Generate JWT token
-                var token = _jwtTokenHelper.GenerateToken(user);
+                var token = _jwtTokenHelper.GenerateToken(user.Email);
                 return (user, token);
             }
 
@@ -68,5 +68,28 @@ public class UserBL : IUserBL
             _logger.LogError(ex, "Error during login for {Email}", loginDTO.Email);
             throw;
         }
+    }
+
+
+    public bool UpdateUserPassword(string email, string newPassword)
+    {
+        // Lookup user by email
+        var user = _userRL.FindByEmail(email);
+        if (user == null) return false;
+
+        // Hash and update the password
+        user.Password = newPassword;
+        return _userRL.Update(user);
+    }
+
+    public UserEntity GetByEmail(string email)
+    {
+        return _userRL.FindByEmail(email);
+    }
+
+
+    public bool ValidateEmail(string email)
+    {
+        return _userRL.ValidateEmail(email);
     }
 }
