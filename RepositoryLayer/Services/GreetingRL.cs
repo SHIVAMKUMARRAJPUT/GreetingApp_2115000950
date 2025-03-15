@@ -7,6 +7,7 @@ using RepositoryLayer.Contexts;
 using ModelLayer.Model;
 using ModelLayer.Entity;
 using NLog;
+using Middleware.GlobalExceptionHandler;
 
 namespace RepositoryLayer.Services
 {
@@ -41,15 +42,32 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                // Check if the user exists in the database
+                //IMPlement code to check
+                bool userExists = _dbContext.Users.Any(u => u.UserId == greetingModel.Uid);
+                if (!userExists)
+                {
+                    Logger.Warn("User with ID: {0} not found. Cannot save greeting.", greetingModel.Uid);
+                    return null; // Return null if user doesn't exist
+                }
+
+                // Check if the greeting message already exists
                 var existingMessage = _dbContext.Greet.FirstOrDefault(e => e.Id == greetingModel.Id);
                 if (existingMessage == null)
                 {
-                    var newMessage = new GreetEntity { Message = greetingModel.Message };
+                    var newMessage = new GreetEntity
+                    {
+                        Message = greetingModel.Message,
+                        UserId = greetingModel.Uid // Assign the UserId
+                    };
+
                     _dbContext.Greet.Add(newMessage);
                     _dbContext.SaveChanges();
+
                     Logger.Info("Greeting saved successfully with ID: {0}", newMessage.Id);
                     return newMessage;
                 }
+
                 Logger.Warn("Greeting already exists with ID: {0}", greetingModel.Id);
                 return existingMessage;
             }
@@ -59,6 +77,7 @@ namespace RepositoryLayer.Services
                 throw;
             }
         }
+
 
         //UC5
         /// <summary>
@@ -117,15 +136,27 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                // Check if the user exists in the database
+                //IMPlement code to check
+                bool userExists = _dbContext.Users.Any(u => u.UserId == greetingModel.Uid);
+                if (!userExists)
+                {
+                    Logger.Warn("User with ID: {0} not found. Cannot save greeting.", greetingModel.Uid);
+                    return null; // Return null if user doesn't exist
+                }
+
+                // Find the greeting message to update
                 var entity = _dbContext.Greet.FirstOrDefault(g => g.Id == id);
                 if (entity != null)
                 {
                     entity.Message = greetingModel.Message;
                     _dbContext.Greet.Update(entity);
                     _dbContext.SaveChanges();
+
                     Logger.Info("Greeting updated successfully for ID: {0}", id);
                     return entity;
                 }
+
                 Logger.Warn("Greeting not found for ID: {0} to update", id);
                 return null;
             }
@@ -135,6 +166,7 @@ namespace RepositoryLayer.Services
                 throw;
             }
         }
+
 
         //UC8
         /// <summary>

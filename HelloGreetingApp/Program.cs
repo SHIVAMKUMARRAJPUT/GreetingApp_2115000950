@@ -38,6 +38,8 @@ try
     // ✅ Register services
     builder.Services.AddControllers();
 
+
+
     // ✅ Register DbContext
     builder.Services.AddDbContext<GreetingAppContext>(options =>
         options.UseSqlServer(connectionString));

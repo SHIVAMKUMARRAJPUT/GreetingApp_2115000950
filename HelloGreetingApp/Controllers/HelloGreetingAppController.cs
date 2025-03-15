@@ -168,7 +168,18 @@ public class HelloGreetingAppController : ControllerBase
     public IActionResult SaveGreeting([FromBody] GreetingModel greetingModel)
     {
         var result = _greetingBL.SaveGreetingBL(greetingModel);
+        if (result == null)
+        {
+            var response1 = new ResponseModel<object>
+            {
+                Success = false,
+                Message = "Unable to save Greeting. Please verify that the user exists. !",
+                Data = result
 
+            };
+            return BadRequest( response1);
+
+        }
         var response = new ResponseModel<object>
         {
             Success = true,
@@ -248,6 +259,18 @@ public class HelloGreetingAppController : ControllerBase
         try
         {
             var result = _greetingBL.EditGreetingBL(id, greetModel);
+
+            if (result == null)
+            {
+                var response1 = new ResponseModel<object>
+                {
+                    Success = false,
+                    Message =$"No address found with ID {id} to update !",
+                    Data = result
+                };
+                return BadRequest(response1);
+            }
+
             if (result != null)
             {
                 response.Success = true;
@@ -257,7 +280,7 @@ public class HelloGreetingAppController : ControllerBase
             }
             response.Success = false;
             response.Message = "Greeting Message Not Found";
-            return NotFound(response);
+            return NotFound(response); 
         }
         catch (Exception ex)
         {
