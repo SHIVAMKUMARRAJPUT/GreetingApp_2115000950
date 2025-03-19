@@ -12,6 +12,7 @@ using System.Text;
 using Microsoft.AspNetCore.Authorization;
 using Middleware.HashingAlgo;
 using ModelLayer.Model;
+using Middleware.RabbitMQClient;
 
 [Route("api/[controller]")]
 [ApiController]
@@ -21,14 +22,16 @@ public class UserController : ControllerBase
     private readonly IUserBL _userBL;
     private readonly JwtTokenHelper _jwtTokenHelper; 
     private readonly IConfiguration _configuration;
-    private readonly SMTP _smtp; 
+    private readonly SMTP _smtp;
+    private readonly IRabbitMQService _rabbitMQService;
 
-    public UserController(IUserBL userBL, JwtTokenHelper _jwtTokenHelper, SMTP _smtp, IConfiguration configuration)
+    public UserController(IUserBL userBL, JwtTokenHelper _jwtTokenHelper, SMTP _smtp, IConfiguration configuration, IRabbitMQService _rabbitMQService)
     {
         this._jwtTokenHelper = _jwtTokenHelper;
         this._smtp = _smtp;
         _userBL = userBL ?? throw new ArgumentNullException(nameof(userBL), "UserBL cannot be null."); // Ensures userBL is not null
         _configuration = configuration;
+        this._rabbitMQService=_rabbitMQService;
     }
 
     // User Registration API
@@ -54,6 +57,8 @@ public class UserController : ControllerBase
             }
 
             _logger.Info($"User registered successfully: {registerDTO.Email}");
+            string email = registerDTO.Email;
+            _rabbitMQService.SendMessage(email + ", You have succeffuly Registered & LoggedIn!!");
             return Created("user registered", new { Success = true, Message = "User registered successfully." }); // Returns 201 Created
         }
         catch (Exception ex)
@@ -86,6 +91,7 @@ public class UserController : ControllerBase
             }
 
             _logger.Info($"User {loginDTO.Email} logged in successfully.");
+            _rabbitMQService.ReceiveMessage();
             return Ok(new
             {
                 Success = true,

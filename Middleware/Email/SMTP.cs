@@ -33,8 +33,7 @@ namespace Middleware.Email
 
                 using var smtp = new SmtpClient();
 
-                // Establish connection with SMTP server (check if StartTls or SSL is required)
-                //await smtp.ConnectAsync(_config["SMTP:Host"], int.Parse(_config["SMTP:Port"]), MailKit.Security.SecureSocketOptions.StartTls);
+
                 smtp.Connect("smtp.gmail.com", 587, MailKit.Security.SecureSocketOptions.StartTls);
 
 

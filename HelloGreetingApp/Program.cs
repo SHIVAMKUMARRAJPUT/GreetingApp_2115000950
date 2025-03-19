@@ -1,8 +1,4 @@
-﻿using Microsoft.AspNetCore.Builder;
-using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Microsoft.OpenApi.Models;
-using BusinessLayer.Interface;
+﻿using BusinessLayer.Interface;
 using NLog;
 using NLog.Web;
 using System;
@@ -12,12 +8,14 @@ using RepositoryLayer.Interface;
 using RepositoryLayer.Services;
 using BusinessLayer.Services;
 using Middleware.JwtHelper;
+using Microsoft.Extensions.Caching.StackExchangeRedis;
+using Middleware.RabbitMQClient;
+using StackExchange.Redis;
 
-var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
-logger.Info("Starting application...");
+    var logger = LogManager.Setup().LoadConfigurationFromAppSettings().GetCurrentClassLogger();
+    logger.Info("Starting application...");
 
-try
-{
+
     var builder = WebApplication.CreateBuilder(args);
 
     // ✅ Setup NLog for logging
@@ -38,6 +36,13 @@ try
     // ✅ Register services
     builder.Services.AddControllers();
 
+    // ✅ Register Redis Distributed Cache
+    builder.Services.AddStackExchangeRedisCache(options =>
+    {
+        options.Configuration = builder.Configuration.GetConnectionString("Redis");
+        options.InstanceName = "GreetingApp_";
+    });
+    builder.Services.AddSingleton<IConnectionMultiplexer>(ConnectionMultiplexer.Connect("localhost:6379"));
 
 
     // ✅ Register DbContext
@@ -47,6 +52,8 @@ try
     builder.Services.AddScoped<Middleware.Email.SMTP>();
 
     // ✅ Register Business & Repository Layer
+
+    builder.Services.AddScoped<IRabbitMQService, RabbitMQService>();
     builder.Services.AddScoped<IGreetingRL, GreetingRL>();
     builder.Services.AddScoped<IGreetingBL, GreetingBL>();
     builder.Services.AddScoped<IUserBL, UserBL>();
@@ -62,10 +69,8 @@ try
     var app = builder.Build();
 
     // ✅ Enable Swagger UI in Development
-  
-        app.UseSwagger();
-        app.UseSwaggerUI();
-    
+    app.UseSwagger();
+    app.UseSwaggerUI();
 
     // ✅ Middleware Configuration
     app.UseHttpsRedirection();
@@ -78,12 +83,3 @@ try
 
     logger.Info("Application started successfully.");
     app.Run();
-}
-catch (Exception ex)
-{
-    logger.Fatal(ex, "Application startup failed.");
-}
-finally
-{
-    LogManager.Shutdown();
-}
