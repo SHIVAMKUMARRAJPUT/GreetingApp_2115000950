@@ -16,7 +16,8 @@ public class HelloGreetingAppController : ControllerBase
 {
     private IGreetingBL _greetingBL;
     private static readonly Logger logger = LogManager.GetCurrentClassLogger();
-    public HelloGreetingAppController(IGreetingBL greeting){
+    public HelloGreetingAppController(IGreetingBL greeting)
+    {
         _greetingBL = greeting;
     }
     //UC3
@@ -28,7 +29,7 @@ public class HelloGreetingAppController : ControllerBase
     [HttpPost("Hello")]
     public IActionResult GetGreeting([FromBody] RequestModel model)
     {
-       
+
         string greetingMessage = _greetingBL.GetGreeting(model);
         return Ok(new { Message = greetingMessage });
     }
@@ -41,7 +42,7 @@ public class HelloGreetingAppController : ControllerBase
         try
         {
             logger.Info("GREET request received.");
-            return Ok(new { Success = true, Message = "Hello, welcome to our API!",data=_greetingBL.SayHello() });
+            return Ok(new { Success = true, Message = "Hello, welcome to our API!", data = _greetingBL.SayHello() });
         }
         catch (Exception ex)
         {
@@ -51,8 +52,10 @@ public class HelloGreetingAppController : ControllerBase
     }
 
     [HttpGet]
-    public IActionResult Get(){
-        try {
+    public IActionResult Get()
+    {
+        try
+        {
             logger.Info("GET request received.");
             List<RequestModel> data = _greetingBL.GetAll();
             return Ok(new { Success = true, Message = "Data fetched successfully", Data = data });
@@ -177,7 +180,7 @@ public class HelloGreetingAppController : ControllerBase
                 Data = result
 
             };
-            return BadRequest( response1);
+            return BadRequest(response1);
 
         }
         var response = new ResponseModel<object>
@@ -197,55 +200,74 @@ public class HelloGreetingAppController : ControllerBase
     [HttpGet("GetGreetingById/{id}")]
     public IActionResult GetGreetingById(int id)
     {
-        var response = new ResponseModel<GreetingModel>();
         try
         {
-            var result = _greetingBL.GetGreetingByIdBL(id);
-            if (result != null)
+            var entity = _greetingBL.GetGreetingByIdBL(id);
+            if (entity != null)
             {
-                response.Success = true;
-                response.Message = "Greeting Message Found";
-                response.Data = result;
-                return Ok(response);
+                var model = new GreetingModel
+                {
+                    Id = entity.Id,
+                    Message = entity.Message,
+                    Uid = entity.Uid
+                };
+                return Ok(new ResponseModel<GreetingModel>
+                {
+                    Success = true,
+                    Message = "Greeting Message Found",
+                    Data = model
+                });
             }
-            response.Success = false;
-            response.Message = "Greeting Message Not Found";
-            return NotFound(response);
+            return NotFound(new ResponseModel<GreetingModel>
+            {
+                Success = false,
+                Message = "Greeting Message Not Found"
+            });
         }
         catch (Exception ex)
         {
             var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
             return StatusCode(500, errorResponse);
-
         }
     }
 
 
-    //UC6
+
+//UC6
+
 
     [HttpGet("GetAllGreetings")]
     public IActionResult GetAllGreetings()
     {
-        ResponseModel<List<GreetingModel>> response = new ResponseModel<List<GreetingModel>>();
         try
         {
-            var result = _greetingBL.GetAllGreetingsBL();
-            if (result != null && result.Count > 0)
+            var entities = _greetingBL.GetAllGreetingsBL();
+            if (entities != null && entities.Count > 0)
             {
-                response.Success = true;
-                response.Message = "Greeting Messages Found";
-                response.Data = result;
-                return Ok(response);
+                var models = entities.Select(entity => new GreetingModel
+                {
+                    Id = entity.Id,
+                    Message = entity.Message,
+                    Uid = entity.Uid
+                }).ToList();
+
+                return Ok(new ResponseModel<List<GreetingModel>>
+                {
+                    Success = true,
+                    Message = "Greeting Messages Found",
+                    Data = models
+                });
             }
-            response.Success = false;
-            response.Message = "No Greeting Messages Found";
-            return NotFound(response);
+            return NotFound(new ResponseModel<List<GreetingModel>>
+            {
+                Success = false,
+                Message = "No Greeting Messages Found"
+            });
         }
         catch (Exception ex)
         {
             var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
             return StatusCode(500, errorResponse);
-
         }
     }
 
@@ -253,40 +275,38 @@ public class HelloGreetingAppController : ControllerBase
     //UC7
 
     [HttpPut("EditGreeting/{id}")]
-    public IActionResult EditGreeting(int id, GreetingModel greetModel)
+    public IActionResult EditGreeting(int id, [FromBody] GreetingModel greetModel)
     {
-        ResponseModel<GreetingModel> response = new ResponseModel<GreetingModel>();
         try
         {
-            var result = _greetingBL.EditGreetingBL(id, greetModel);
-
-            if (result == null)
+            var entity = _greetingBL.EditGreetingBL(id, greetModel);
+            if (entity == null)
             {
-                var response1 = new ResponseModel<object>
+                return BadRequest(new ResponseModel<object>
                 {
                     Success = false,
-                    Message =$"No address found with ID {id} to update !",
-                    Data = result
-                };
-                return BadRequest(response1);
+                    Message = $"No Greeting found with ID {id} to update!"
+                });
             }
 
-            if (result != null)
+            var updatedModel = new GreetingModel
             {
-                response.Success = true;
-                response.Message = "Greeting Message Updated Successfully";
-                response.Data = result;
-                return Ok(response);
-            }
-            response.Success = false;
-            response.Message = "Greeting Message Not Found";
-            return NotFound(response); 
+                Id = entity.Id,
+                Message = entity.Message,
+                Uid = entity.Uid
+            };
+
+            return Ok(new ResponseModel<GreetingModel>
+            {
+                Success = true,
+                Message = "Greeting Message Updated Successfully",
+                Data = updatedModel
+            });
         }
         catch (Exception ex)
         {
             var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
             return StatusCode(500, errorResponse);
-
         }
     }
 
@@ -296,25 +316,27 @@ public class HelloGreetingAppController : ControllerBase
     [HttpDelete("DeleteGreeting/{id}")]
     public IActionResult DeleteGreeting(int id)
     {
-        ResponseModel<string> response = new ResponseModel<string>();
         try
         {
             bool result = _greetingBL.DeleteGreetingBL(id);
             if (result)
             {
-                response.Success = true;
-                response.Message = "Greeting Message Deleted Successfully";
-                return Ok(response);
+                return Ok(new ResponseModel<string>
+                {
+                    Success = true,
+                    Message = "Greeting Message Deleted Successfully"
+                });
             }
-            response.Success = false;
-            response.Message = "Greeting Message Not Found";
-            return NotFound(response);
+            return NotFound(new ResponseModel<string>
+            {
+                Success = false,
+                Message = "Greeting Message Not Found"
+            });
         }
         catch (Exception ex)
         {
             var errorResponse = ExceptionHandler.CreateErrorResponse(ex);
             return StatusCode(500, errorResponse);
-
         }
     }
 }
