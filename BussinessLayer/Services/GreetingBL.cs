@@ -1,6 +1,5 @@
 ﻿using BusinessLayer.Interface;
 using ModelLayer.Model;
-//using RepositoryLayer.Entity;
 using RepositoryLayer.Services;
 using RepositoryLayer.Interface;
 using ModelLayer.Entity;
@@ -125,6 +124,10 @@ public class GreetingBL : IGreetingBL
         return _greetingRL.GetGreetingByIdRL(Id);
     }
 
+
+
+
+
     //UC6
     public List<GreetingModel> GetAllGreetingsBL()
     {
@@ -135,11 +138,14 @@ public class GreetingBL : IGreetingBL
             return entityList.Select(g => new GreetingModel
             {
                 Id = g.Id,
-                Message = g.Message
+                Message = g.Message,
+                Uid = g.UserId // Ensure Uid is included
             }).ToList();
         }
         return null;
     }
+
+
 
     //UC7
     public GreetingModel EditGreetingBL(int id, GreetingModel greetingModel)
@@ -151,11 +157,13 @@ public class GreetingBL : IGreetingBL
             return new GreetingModel()
             {
                 Id = result.Id,
-                Message = result.Message
+                Message = result.Message,
+                Uid = result.UserId // Ensure Uid is returned
             };
         }
         return null;
     }
+
 
     //UC8
     public bool DeleteGreetingBL(int id)
