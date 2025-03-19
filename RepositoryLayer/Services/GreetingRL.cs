@@ -1,21 +1,25 @@
-﻿
-using RepositoryLayer.Interface;
+﻿using RepositoryLayer.Interface;
 using RepositoryLayer.Contexts;
 using ModelLayer.Model;
 using ModelLayer.Entity;
 using NLog;
 using Middleware.GlobalExceptionHandler;
+using StackExchange.Redis;
+using System.Text.Json;
 
 namespace RepositoryLayer.Services
 {
     public class GreetingRL : IGreetingRL
     {
         private readonly GreetingAppContext _dbContext;
+        private readonly IDatabase _cache;
         private static readonly Logger Logger = LogManager.GetCurrentClassLogger();
 
-        public GreetingRL(GreetingAppContext dbContext)
+        public GreetingRL(GreetingAppContext dbContext, IConnectionMultiplexer redis)
         {
-            _dbContext = dbContext;
+            _dbContext = dbContext ?? throw new ArgumentNullException(nameof(dbContext));
+            _cache = redis.GetDatabase();
+            Logger.Info("GreetingRL instance created.");
         }
 
         // UC4 - Save Greeting
@@ -33,12 +37,13 @@ namespace RepositoryLayer.Services
                 var newMessage = new GreetEntity
                 {
                     Message = greetingModel.Message,
-                    UserId = greetingModel.Uid // Ensure UserId is assigned
+                    UserId = greetingModel.Uid
                 };
 
                 _dbContext.Greet.Add(newMessage);
                 _dbContext.SaveChanges();
 
+                _cache.KeyDelete("AllGreetings"); // Invalidate cache
                 Logger.Info("Greeting saved successfully with ID: {0}", newMessage.Id);
                 return newMessage;
             }
@@ -50,27 +55,41 @@ namespace RepositoryLayer.Services
         }
 
         // UC5 - Get Greeting by ID
-        public GreetingModel GetGreetingByIdRL(int Id)
+        public GreetingModel GetGreetingByIdRL(int id)
         {
             try
             {
-                var entity = _dbContext.Greet.FirstOrDefault(g => g.Id == Id);
+                Logger.Info($"Fetching greeting with ID: {id}");
+                string cacheKey = $"Greeting:{id}";
+                string cachedGreeting = _cache.StringGet(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedGreeting))
+                {
+                    Logger.Info("Greeting found in cache.");
+                    return JsonSerializer.Deserialize<GreetingModel>(cachedGreeting);
+                }
+
+                var entity = _dbContext.Greet.FirstOrDefault(g => g.Id == id);
                 if (entity != null)
                 {
-                    Logger.Info("Greeting fetched successfully for ID: {0}", Id);
-                    return new GreetingModel
+                    var greetingModel = new GreetingModel
                     {
                         Id = entity.Id,
                         Message = entity.Message,
-                        Uid = entity.UserId // Ensure Uid is included
+                        Uid = entity.UserId
                     };
+
+                    _cache.StringSet(cacheKey, JsonSerializer.Serialize(greetingModel), TimeSpan.FromMinutes(10)); // Cache expiration
+                    Logger.Info("Greeting retrieved from database and cached.");
+                    return greetingModel;
                 }
-                Logger.Warn("Greeting not found for ID: {0}", Id);
+
+                Logger.Warn("Greeting not found for ID: {0}", id);
                 return null;
             }
             catch (Exception ex)
             {
-                Logger.Error(ex, "Error while fetching greeting by ID: {0}", Id);
+                Logger.Error(ex, "Error while fetching greeting by ID: {0}", id);
                 throw;
             }
         }
@@ -80,8 +99,19 @@ namespace RepositoryLayer.Services
         {
             try
             {
+                Logger.Info("Fetching all greetings.");
+                string cacheKey = "AllGreetings";
+                string cachedGreetings = _cache.StringGet(cacheKey);
+
+                if (!string.IsNullOrEmpty(cachedGreetings))
+                {
+                    Logger.Info("All greetings found in cache.");
+                    return JsonSerializer.Deserialize<List<GreetEntity>>(cachedGreetings);
+                }
+
                 var greetings = _dbContext.Greet.ToList();
-                Logger.Info("Fetched all greetings successfully. Total Count: {0}", greetings.Count);
+                _cache.StringSet(cacheKey, JsonSerializer.Serialize(greetings), TimeSpan.FromMinutes(10)); // Cache expiration
+                Logger.Info("All greetings retrieved from database and cached.");
                 return greetings;
             }
             catch (Exception ex)
@@ -107,11 +137,13 @@ namespace RepositoryLayer.Services
                 if (entity != null)
                 {
                     entity.Message = greetingModel.Message;
-                    entity.UserId = greetingModel.Uid; // Ensure UserId is updated
+                    entity.UserId = greetingModel.Uid;
 
                     _dbContext.Greet.Update(entity);
                     _dbContext.SaveChanges();
 
+                    _cache.KeyDelete("AllGreetings"); // Invalidate cache
+                    _cache.KeyDelete($"Greeting:{id}"); // Invalidate individual greeting cache
                     Logger.Info("Greeting updated successfully for ID: {0}", id);
                     return entity;
                 }
@@ -136,9 +168,13 @@ namespace RepositoryLayer.Services
                 {
                     _dbContext.Greet.Remove(entity);
                     _dbContext.SaveChanges();
+
+                    _cache.KeyDelete("AllGreetings"); // Invalidate cache
+                    _cache.KeyDelete($"Greeting:{id}");
                     Logger.Info("Greeting deleted successfully for ID: {0}", id);
                     return true;
                 }
+
                 Logger.Warn("Greeting not found for ID: {0} to delete", id);
                 return false;
             }
